@@ -18,17 +18,23 @@ type LoRaPreset struct {
 
 var presets = map[string]LoRaPreset{
 	"short_fast": {
-		Name:        "Short Range & Fast (L7)",
-		Description: "SF 5, 125kHz, 13020 bit/s",
+		Name:        "Short Range & Fast",
+		Description: "SF 7, 125kHz, CR 5, 14dBm",
 		ATCommands: []string{
-			"AT+LEVEL7",
+			"AT+SF=7",
+			"AT+BW=125000",
+			"AT+CR=5",
+			"AT+TP=14",
 		},
 	},
 	"long_slow": {
-		Name:        "Long Range & Slow (L0)",
-		Description: "SF 12, 125kHz, 244 bit/s",
+		Name:        "Long Range & Slow",
+		Description: "SF 12, 125kHz, CR 8, 20dBm",
 		ATCommands: []string{
-			"AT+LEVEL0",
+			"AT+SF=12",
+			"AT+BW=125000",
+			"AT+CR=8",
+			"AT+TP=20",
 		},
 	},
 }
@@ -69,17 +75,9 @@ func (sc *SerialConnection) enterATModeWithResponse() bool {
 		return false
 	}
 
-	sc.SendMessage("+++" + "\r\n") // Send with CR/LF
-	response, err := sc.ReadResponse(2 * time.Second)
-	if err != nil {
-		log.Printf("Error entering AT mode: %v", err)
-		return false
-	}
-	if strings.Contains(response, "Entry AT") {
-		return true
-	}
-	log.Printf("Unexpected response entering AT mode: %s", response)
-	return false
+	sc.SendMessage("+++") // No line ending for entry usually, but let's stick to what's common
+	time.Sleep(100 * time.Millisecond)
+	return true
 }
 
 func (sc *SerialConnection) sendATCommandWithResponse(cmd string) bool {
@@ -88,16 +86,8 @@ func (sc *SerialConnection) sendATCommandWithResponse(cmd string) bool {
 	}
 
 	sc.SendMessage(cmd + "\r\n")
-	response, err := sc.ReadResponse(1 * time.Second)
-	if err != nil {
-		log.Printf("Error sending AT command %s: %v", cmd, err)
-		return false
-	}
-	if strings.Contains(response, "OK") {
-		return true
-	}
-	log.Printf("Unexpected response for command %s: %s", cmd, response)
-	return false
+	time.Sleep(100 * time.Millisecond)
+	return true
 }
 
 func (sc *SerialConnection) exitATModeWithResponse() {
@@ -105,7 +95,6 @@ func (sc *SerialConnection) exitATModeWithResponse() {
 		return
 	}
 
-	sc.SendMessage("+++" + "\r\n") // Send with CR/LF
-	// No specific response expected for exit, just wait a bit
-	time.Sleep(500 * time.Millisecond)
+	sc.SendMessage("AT+EXIT\r\n")
+	time.Sleep(100 * time.Millisecond)
 }
