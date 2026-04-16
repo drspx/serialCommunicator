@@ -19,20 +19,20 @@ var presets = map[string]LoRaPreset{
 		Name:        "Short Range & Fast",
 		Description: "SF 7, 125kHz, CR 5, 14dBm",
 		ATCommands: []string{
-			"AT+SF=7",
-			"AT+BW=125000",
-			"AT+CR=5",
-			"AT+TP=14",
+			"AT+SF7",
+			"AT+BW125000",
+			"AT+CR5",
+			"AT+TP14",
 		},
 	},
 	"long_slow": {
 		Name:        "Long Range & Slow",
 		Description: "SF 12, 125kHz, CR 8, 20dBm",
 		ATCommands: []string{
-			"AT+SF=12",
-			"AT+BW=125000",
-			"AT+CR=8",
-			"AT+TP=20",
+			"AT+SF12",
+			"AT+BW125000",
+			"AT+CR8",
+			"AT+TP20",
 		},
 	},
 }
