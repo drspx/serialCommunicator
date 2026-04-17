@@ -19,17 +19,23 @@ type LoRaPreset struct {
 
 var presets = map[string]LoRaPreset{
 	"short_fast": {
-		Name:        "Short Range & Fast (L7)",
-		Description: "SF 5, 125kHz, 13020 bit/s",
+		Name:        "Short Range & Fast",
+		Description: "SF 7, 125kHz, CR 5, 14dBm",
 		ATCommands: []string{
-			"AT+LEVEL7",
+			"AT+SF7",
+			"AT+BW125000",
+			"AT+CR5",
+			"AT+TP14",
 		},
 	},
 	"long_slow": {
-		Name:        "Long Range & Slow (L0)",
-		Description: "SF 12, 125kHz, 244 bit/s",
+		Name:        "Long Range & Slow",
+		Description: "SF 12, 125kHz, CR 8, 20dBm",
 		ATCommands: []string{
-			"AT+LEVEL0",
+			"AT+SF12",
+			"AT+BW125000",
+			"AT+CR8",
+			"AT+TP20",
 		},
 	},
 }

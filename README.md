@@ -2,20 +2,22 @@
 
 A TUI application built with Go and BubbleTea for communicating with LoRa modules via serial port (FTDI adapter).
 
+The application is designed for simple LoRa module communication and automatically attempts to connect to the serial port on startup.
+
 ## Features
 
-- **Serial Communication**: Connect to LoRa modules via serial port (FTDI adapter)
-- **AT Command Presets**: Configure LoRa parameters with predefined presets
-  - Short Range & Fast: SF7, 125kHz, CR5, 14dBm
-  - Long Range & Slow: SF12, 125kHz, CR8, 20dBm
-- **Chat Interface**: Send and receive messages with real-time chat display
-- **Complete Message Sending**: Messages sent as whole packets for optimal LoRa performance
-- **TUI Navigation**: Easy navigation with keyboard shortcuts
+- **Automatic Connection**: Connects to the default serial port (`/dev/ttyUSB0`) on startup
+- **Serial Communication**: Real-time communication via FTDI adapters
+- **LoRa Presets**: Quickly configure LoRa parameters with optimized presets
+  - **Long Range & Slow (Default)**: SF12, 125kHz, CR8, 20dBm (optimized for range)
+  - **Short Range & Fast**: SF7, 125kHz, CR5, 14dBm (optimized for speed)
+- **Chat Interface**: Interactive chat-like display for messages
+- **TUI Navigation**: Seamless navigation using keyboard shortcuts
 
 ## Installation
 
 1. Install Go (version 1.24+)
-2. Clone/download this repository
+2. Clone this repository
 3. Build the application:
 
 ```bash
@@ -30,10 +32,7 @@ Run the application:
 ./run.sh
 ```
 
-Or directly:
-```bash
-go run .
-```
+The application will automatically attempt to connect. Use **Ctrl+S** to manually reconnect if needed.
 
 ## Keyboard Shortcuts
 
@@ -41,55 +40,30 @@ go run .
 - **Space**: Toggle preset (when preset field is focused)
 - **Enter**: Send message (when message field is focused)
 - **Backspace**: Delete character (when message field is focused)
-- **Ctrl+S**: Connect to serial port
+- **Ctrl+S**: Reconnect to serial port
 - **Ctrl+D**: Disconnect from serial port
 - **Ctrl+H**: Toggle help
 - **q**: Quit application
 
 ## Default Settings
 
-- Serial Port: `/dev/ttyUSB0` (common for FTDI adapters)
-- Baud Rate: `9600`
+- **Serial Port**: `/dev/ttyUSB0`
+- **Baud Rate**: `9600`
+- **Default Preset**: Long Range & Slow (SF12)
 
-## LoRa AT Commands Sent
+## LoRa Configuration
 
-When switching presets, the application sends these AT commands:
-
-### Short Range & Fast
-```
-AT+SF=7
-AT+BW=125000
-AT+CR=5
-AT+TP=14
-```
-
-### Long Range & Slow
-```
-AT+SF=12
-AT+BW=125000
-AT+CR=8
-AT+TP=20
-```
+When switching presets, the application enters AT mode and sends the appropriate commands to configure your module. Ensure your module is compatible with standard AT commands.
 
 ## Requirements
 
 - Go 1.24 or higher
-- LoRa module configured to accept AT commands
+- LoRa module configured for AT commands
 - FTDI USB-to-serial adapter
-- Serial port access (typically `/dev/ttyUSB0` on Linux)
-
-## Project Structure
-
-- `main.go` - Application entry point
-- `model.go` - BubbleTea model and UI logic
-- `serial.go` - Serial communication implementation
-- `lora_presets.go` - LoRa preset configurations
-- `build.sh` - Build script
-- `run.sh` - Run script
+- Appropriate permissions for serial port access (`/dev/ttyUSB0` or similar)
 
 ## Notes
 
-- The application sends messages as complete packets for optimal LoRa performance
-- Make sure your LoRa module is configured to accept AT commands
-- Adjust serial port in the configuration if not using `/dev/ttyUSB0`
-- Baud rate is fixed at 9600 - configure your LoRa module accordingly# serialCommunicator
+- Messages are sent with `\r\n` line endings as complete packets.
+- If the default port is not `/dev/ttyUSB0`, you can modify it in `model.go` or using the on-screen configuration (if available).
+- The baud rate is fixed at 9600 to match common LoRa module defaults.

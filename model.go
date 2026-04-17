@@ -29,10 +29,10 @@ func initialModel() model {
 		serialPort:   "/dev/ttyUSB0",
 		baudRate:     9600,
 		connected:    false,
-		preset:       "short_fast",
+		preset:       "long_slow",
 		messageInput: "",
 		chatHistory:  []string{},
-		focusedInput: "serial",
+		focusedInput: "message",
 		helpMode:     false,
 		serialConn:   nil,
 	}
@@ -42,9 +42,12 @@ type serialMsg string
 type errorMsg error
 
 func (m model) Init() tea.Cmd {
-	return tea.Tick(time.Second/10, func(t time.Time) tea.Msg {
-		return tickMsg(t)
-	})
+	return tea.Batch(
+		m.connectSerial(),
+		tea.Tick(time.Second/10, func(t time.Time) tea.Msg {
+			return tickMsg(t)
+		}),
+	)
 }
 
 type tickMsg time.Time
@@ -124,7 +127,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.messageInput += " "
 				return m, nil
 			}
+			return m, nil
 		default:
+			if m.helpMode {
+				m.helpMode = false
+				return m, nil
+			}
 			if m.focusedInput == "message" && len(msg.String()) == 1 {
 				m.messageInput += msg.String()
 				return m, nil
@@ -291,32 +299,26 @@ func (m model) renderChatHistory() string {
 func (m model) helpView() string {
 	helpText := `LoRa Serial Communicator - Help
 
+The application connects to the serial port automatically on startup.
+Default settings: SF12 (Long Range & Slow), 125kHz, 9600 baud.
+
 Navigation:
   Tab/Shift+Tab    Cycle through input fields
   Space            Toggle preset in preset field
   Enter            Send message in message field
   Backspace        Delete character in message field
   Ctrl+H           Toggle help
-  Ctrl+S           Connect to serial port
+  Ctrl+S           Reconnect to serial port
   Ctrl+D           Disconnect from serial port
   q                Quit application
 
-Presets (AT Commands):
-  Short Range & Fast (L7)  SF 5, 125kHz, 13020 bit/s
-  Long Range & Slow (L0)   SF 12, 125kHz, 244 bit/s
+Presets:
+  Short Range & Fast: SF7, 125kHz, CR5, 14dBm
+  Long Range & Slow:  SF12, 125kHz, CR8, 20dBm
 
-Serial Settings:
-  Default port: /dev/ttyUSB0 (common for FTDI adapters)
-  Baud rate: Fixed at 9600 (configure your LoRa module accordingly)
-
-AT Command Support:
-  The application sends "+++" to enter AT command mode (no \\r\\n),
-  then sends the selected preset command (e.g., "AT+LEVEL7\\r\\n").
-  The module should automatically return to data mode.
-
-Message Sending:
-  Type messages in the message field and press Enter to send.
-  All messages are sent with a "\\r\\n" line ending.
+Connection:
+  If disconnected, you can use Ctrl+S to try connecting again.
+  The current serial port and baud rate are shown in the configuration section.
 
 Press any key to return...`
 
